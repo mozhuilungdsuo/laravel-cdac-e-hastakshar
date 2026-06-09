@@ -13,6 +13,41 @@ composer require mozhuilungdsuo/laravel-cdac-e-hastakshar
 php artisan vendor:publish --tag=cdac-e-hastakshar-config
 ```
 
+### Install Requirements
+
+This package requires the PHP Imagick extension because uploaded PDFs/images are converted to page images before the signature placeholder is prepared.
+
+On macOS with Homebrew:
+
+```bash
+brew install imagemagick
+pecl install imagick
+```
+
+On Ubuntu/Debian:
+
+```bash
+sudo apt-get install php-imagick
+```
+
+Confirm PHP can see the extension:
+
+```bash
+php -m | grep imagick
+```
+
+If Composer says the package was only found with `dev` stability, tag a stable release in the package repository:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Until a tag exists, install the development branch explicitly:
+
+```bash
+composer require mozhuilungdsuo/laravel-cdac-e-hastakshar:dev-main
+```
 
 ## Keys
 
