@@ -69,9 +69,11 @@ class EsignController
     {
         $validated = $request->validate([
             'document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:20480'],
+            'signer_name' => ['nullable', 'string', 'max:120'],
         ]);
+        $signerName = $validated['signer_name'] ?? $request->user()?->name;
 
-        $payload = $esign->createRequest($validated['document']);
+        $payload = $esign->createRequest($validated['document'], $signerName);
 
         return view('esign.redirect', $payload);
     }
@@ -127,6 +129,21 @@ Create `resources/views/esign/index.blade.php` in the host app for the upload fo
 
             <form method="POST" action="{{ route('esign.store') }}" enctype="multipart/form-data">
                 @csrf
+
+                <div>
+                    <label for="signer_name">{{ __('Signer name') }}</label>
+                    <input
+                        id="signer_name"
+                        type="text"
+                        name="signer_name"
+                        value="{{ old('signer_name', auth()->user()?->name) }}"
+                        maxlength="120"
+                    >
+                </div>
+
+                @error('signer_name')
+                    <p style="color: #b91c1c;">{{ $message }}</p>
+                @enderror
 
                 <div>
                     <label for="document">{{ __('Document') }}</label>

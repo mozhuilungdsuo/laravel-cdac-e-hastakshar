@@ -22,7 +22,7 @@ class EsignService
     /**
      * @return array{txn: string, request_xml: string, endpoint: string}
      */
-    public function createRequest(UploadedFile $document): array
+    public function createRequest(UploadedFile $document, ?string $signerName = null): array
     {
         $this->ensurePrivateKeyExists();
 
@@ -37,7 +37,7 @@ class EsignService
 
         $absoluteSourcePath = $this->absolutePath($sourcePath);
         $absoluteUnsignedPath = $this->absolutePath($unsignedPath);
-        $prepared = $this->prepareUnsignedPdf($absoluteSourcePath, $absoluteUnsignedPath);
+        $prepared = $this->prepareUnsignedPdf($absoluteSourcePath, $absoluteUnsignedPath, $signerName);
         $this->disk()->delete($sourcePath);
 
         $txn = "{$transactionId}----{$prepared['byte_range'][1]}";
@@ -117,7 +117,7 @@ class EsignService
     /**
      * @return array{byte_range: array{0: int, 1: int, 2: int, 3: int}, hash: string}
      */
-    private function prepareUnsignedPdf(string $sourcePath, string $unsignedPath): array
+    private function prepareUnsignedPdf(string $sourcePath, string $unsignedPath, ?string $signerName): array
     {
         $tempDirectory = dirname($unsignedPath).'/pages';
 
@@ -150,7 +150,7 @@ class EsignService
         }
 
         $appearance = config('esign.signature_appearance');
-        $this->addVisibleSignatureText($pdf, $page['pid'], $appearance);
+        $this->addVisibleSignatureText($pdf, $page['pid'], $appearance, $signerName);
         $pdf->setSignatureAppearance(
             posx: $appearance['x'],
             posy: $appearance['y'],
@@ -178,10 +178,10 @@ class EsignService
     /**
      * @param  array{x: float, y: float, width: float, height: float}  $appearance
      */
-    private function addVisibleSignatureText(EsignPdf $pdf, int $pageId, array $appearance): void
+    private function addVisibleSignatureText(EsignPdf $pdf, int $pageId, array $appearance, ?string $signerName): void
     {
         $pdf->addTextCellXY(
-            txt: $this->visibleSignatureText(),
+            txt: $this->visibleSignatureText($signerName),
             pid: $pageId,
             posx: $appearance['x'] + 17,
             posy: $appearance['y'],
@@ -195,11 +195,13 @@ class EsignService
         );
     }
 
-    private function visibleSignatureText(): string
+    private function visibleSignatureText(?string $signerName): string
     {
         $timestamp = now((string) config('esign.timestamp_timezone'));
+        $signerName = preg_replace('/\s+/', ' ', trim((string) $signerName));
+        $signedBy = 'Digitally Signed by:'.($signerName !== '' ? " {$signerName}" : '');
 
-        return 'Digitally Signed by: '.PHP_EOL
+        return $signedBy.PHP_EOL
             .'Date: '.$timestamp->format('d-m-Y').PHP_EOL
             .$timestamp->format('h:i a');
     }
