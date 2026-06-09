@@ -13,27 +13,6 @@ composer require mozhuilungdsuo/laravel-cdac-e-hastakshar
 php artisan vendor:publish --tag=cdac-e-hastakshar-config
 ```
 
-For local development from a Laravel app:
-
-```json
-{
-    "repositories": [
-        {
-            "type": "path",
-            "url": "packages/laravel-cdac-e-hastakshar",
-            "options": {
-                "symlink": true
-            }
-        }
-    ]
-}
-```
-
-Then require the package:
-
-```bash
-composer require mozhuilungdsuo/laravel-cdac-e-hastakshar:^1.0
-```
 
 ## Keys
 
