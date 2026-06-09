@@ -15,24 +15,48 @@ php artisan vendor:publish --tag=cdac-e-hastakshar-config
 
 ### Install Requirements
 
-This package requires the PHP Imagick extension because uploaded PDFs/images are converted to page images before the signature placeholder is prepared.
+This package requires the PHP Imagick extension because uploaded PDFs/images are converted to page images before the signature placeholder is prepared. Composer will fail with `requires ext-imagick * but it is not present` until the extension is installed for the same PHP binary used by Composer.
 
 On macOS with Homebrew:
 
 ```bash
 brew install imagemagick
 pecl install imagick
+php --ini
+php -m | grep -i imagick
 ```
 
 On Ubuntu/Debian:
 
 ```bash
+sudo apt-get update
 sudo apt-get install php-imagick
+sudo systemctl restart apache2
+# or, for PHP-FPM:
+sudo systemctl restart php*-fpm
+php -m | grep -i imagick
+```
+
+If you use a versioned PHP package on Ubuntu/Debian, install the matching extension package:
+
+```bash
+sudo apt-get install php8.3-imagick
+# replace 8.3 with your PHP version
+```
+
+On RHEL/CentOS/Fedora:
+
+```bash
+sudo dnf install php-pecl-imagick
+sudo systemctl restart httpd
+php -m | grep -i imagick
 ```
 
 Confirm PHP can see the extension:
 
 ```bash
+php -v
+composer -vvv about
 php -m | grep imagick
 ```
 
