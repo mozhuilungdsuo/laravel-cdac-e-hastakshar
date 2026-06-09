@@ -36,18 +36,7 @@ Confirm PHP can see the extension:
 php -m | grep imagick
 ```
 
-If Composer says the package was only found with `dev` stability, tag a stable release in the package repository:
 
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-Until a tag exists, install the development branch explicitly:
-
-```bash
-composer require mozhuilungdsuo/laravel-cdac-e-hastakshar:dev-main
-```
 
 ## Keys
 
