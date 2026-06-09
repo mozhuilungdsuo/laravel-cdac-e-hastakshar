@@ -40,7 +40,7 @@ php -m | grep imagick
 
 ## Keys
 
-Private keys and certificates are intentionally not shipped with the package. Add them to the host app, commonly:
+Private keys and certificates are intentionally not shipped with the package. Add them to the root folder of the app, commonly:
 
 ```txt
 keys/
@@ -65,6 +65,11 @@ use RuntimeException;
 
 class EsignController
 {
+    public function index()
+    {
+        return view('esign.index');
+    }
+
     public function store(Request $request, EsignService $esign)
     {
         $validated = $request->validate([
