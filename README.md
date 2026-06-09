@@ -90,6 +90,33 @@ class EsignController
 }
 ```
 
+Create `resources/views/esign/redirect.blade.php` in the host app to submit the generated request to CDAC:
+
+```blade
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ __('Redirecting to eSign') }}</title>
+    </head>
+    <body>
+        <form action="{{ $endpoint }}" method="post" id="esign-request-form">
+            <input type="hidden" id="eSignRequest" name="eSignRequest" value="{{ $request_xml }}">
+            <input type="hidden" id="aspTxnID" name="aspTxnID" value="{{ $txn }}">
+            <input type="hidden" id="Content-Type" name="Content-Type" value="application/xml">
+            <noscript>
+                <button type="submit">{{ __('Continue to eSign') }}</button>
+            </noscript>
+        </form>
+
+        <script>
+            document.getElementById('esign-request-form').submit();
+        </script>
+    </body>
+</html>
+```
+
 Example host-app routes:
 
 ```php
