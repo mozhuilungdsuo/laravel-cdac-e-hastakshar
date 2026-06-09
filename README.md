@@ -78,9 +78,29 @@ class EsignController
 
     public function response(Request $request, EsignService $esign)
     {
-        $result = $esign->completeResponse((string) $request->input('eSignResponse', ''));
+        $responseXml = (string) $request->input('eSignResponse', '');
 
-        return redirect()->route('esign.download', $result['transaction_id']);
+        if ($responseXml === '') {
+            return view('esign.result', [
+                'status' => 'failed',
+                'message' => 'The eSign response was empty.',
+            ]);
+        }
+
+        try {
+            $result = $esign->completeResponse($responseXml);
+        } catch (RuntimeException $exception) {
+            return view('esign.result', [
+                'status' => 'failed',
+                'message' => $exception->getMessage(),
+            ]);
+        }
+
+        return view('esign.result', [
+            'status' => 'completed',
+            'transactionId' => $result['transaction_id'],
+            'downloadUrl' => route('esign.download', $result['transaction_id']),
+        ]);
     }
 
     public function download(string $transactionId, EsignService $esign)
@@ -88,6 +108,48 @@ class EsignController
         return $esign->signedDownloadResponse($transactionId);
     }
 }
+```
+
+Create `resources/views/esign/index.blade.php` in the host app for the upload form:
+
+```blade
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ __('eSign document') }}</title>
+    </head>
+    <body>
+        <main style="max-width: 720px; margin: 48px auto; font-family: sans-serif;">
+            <h1>{{ __('eSign document') }}</h1>
+            <p>{{ __('Upload a PDF or image to prepare it for CDAC e-Hastakshar.') }}</p>
+
+            <form method="POST" action="{{ route('esign.store') }}" enctype="multipart/form-data">
+                @csrf
+
+                <div>
+                    <label for="document">{{ __('Document') }}</label>
+                    <input
+                        id="document"
+                        type="file"
+                        name="document"
+                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                        required
+                    >
+                </div>
+
+                @error('document')
+                    <p style="color: #b91c1c;">{{ $message }}</p>
+                @enderror
+
+                <button type="submit" style="margin-top: 16px;">
+                    {{ __('Start eSign') }}
+                </button>
+            </form>
+        </main>
+    </body>
+</html>
 ```
 
 Create `resources/views/esign/redirect.blade.php` in the host app to submit the generated request to CDAC:
@@ -113,6 +175,32 @@ Create `resources/views/esign/redirect.blade.php` in the host app to submit the 
         <script>
             document.getElementById('esign-request-form').submit();
         </script>
+    </body>
+</html>
+```
+
+Create `resources/views/esign/result.blade.php` in the host app for success/failure responses:
+
+```blade
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ __('eSign result') }}</title>
+    </head>
+    <body>
+        <main style="max-width: 720px; margin: 48px auto; font-family: sans-serif;">
+            @if ($status === 'completed')
+                <h1>{{ __('eSign completed') }}</h1>
+                <p>{{ __('The signed PDF has been saved and is ready to download.') }}</p>
+                <p>{{ __('Transaction') }}: {{ $transactionId }}</p>
+                <a href="{{ $downloadUrl }}">{{ __('Download') }}</a>
+            @else
+                <h1>{{ __('eSign failed') }}</h1>
+                <p>{{ $message }}</p>
+            @endif
+        </main>
     </body>
 </html>
 ```
