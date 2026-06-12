@@ -74,6 +74,7 @@ keys/
 Configure the path:
 
 ```env
+ESIGN_ASP_ID=your-asp-id
 ESIGN_PRIVATE_KEY=keys/eSign_Staging_Private.key
 ESIGN_PRIVATE_KEY_PASSPHRASE=
 ```

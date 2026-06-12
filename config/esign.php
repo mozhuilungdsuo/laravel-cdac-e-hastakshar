@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'asp_id' => env('ESIGN_ASP_ID', 'NDIT-900'),
+    'asp_id' => env('ESIGN_ASP_ID'),
 
     'endpoint' => env('ESIGN_ENDPOINT', 'https://es-staging.cdac.in/esignlevel2/2.1/form/signdoc'),
 
