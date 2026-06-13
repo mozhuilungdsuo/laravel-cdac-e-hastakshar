@@ -3,7 +3,6 @@
     "description": "Laravel package for CDAC e-Hastakshar PDF request and response handling.",
     "type": "library",
     "license": "MIT",
-    "version": "1.0.0",
     "require": {
         "php": "^8.2",
         "ext-imagick": "*",
